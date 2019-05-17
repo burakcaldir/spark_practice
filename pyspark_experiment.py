@@ -68,3 +68,31 @@ no_na_sp = sp_data.filter(sp_data.cellcount > 0)
 
 # Select and show only certain columns
 print(no_na_sp.select(["p25_earnings", "p50_earnings"]).show())
+
+# Establish as a table, query it
+sp_data.registerTempTable("ut_grads")
+query1 = sqlContext.sql("select * from ut_grads where ut_grads.cellcount > 0 limit 3 ").show()
+print(query1)
+
+#########################
+# Summarize and Visualization
+
+sp_data.registerTempTable("ut_grads")
+
+query2 = sqlContext.sql("select \
+    mean(p50_earnings) as earn, \
+    year_postgrad \
+    from ut_grads \
+    where ut_grads.cellcount > 0 \
+    and ut_grads.deglevl_code = 3 \
+    group by ut_grads.year_postgrad")
+
+query2.show()
+print(type(query2))
+print(query2)
+
+import matplotlib.pyplot as plt, numpy as np
+
+utgrad_df = query2.toPandas()
+utgrad_df.plot.bar(x='year_postgrad', y='earn', rot=0)
+plt.show()
